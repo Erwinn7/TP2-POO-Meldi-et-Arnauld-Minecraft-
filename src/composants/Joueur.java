@@ -1,18 +1,28 @@
 package composants;
 
-
+import java.net.Socket;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+<<<<<<< HEAD
 import jeu.PreparationJeu;
 
 
 public class Joueur extends Entite {
 	
     private List<Item> inventaire;
+=======
+import jeu.ServeurPvP;
+
+public class Joueur extends Entite  {
+
+	private List<Item> inventaire;
+>>>>>>> 790ddbbe3bd9aba0e79449e3820d1eb3a84dca12
     private Random random;
 
 //  Direction 
@@ -27,7 +37,7 @@ public class Joueur extends Entite {
         this.random = new Random();
     }
     
-    public Joueur(String nom) {
+    public Joueur(String nom) { 
     	this(nom, 100, 10, 10, 1, 1, null, null);
     }
     
@@ -300,6 +310,7 @@ public class Joueur extends Entite {
         }
     }
     
+<<<<<<< HEAD
     public void crafter(Item item1, Item item2) {
         
         Map<List<String>, String> tableDeCraft = PreparationJeu.getTableDeCraft();
@@ -332,6 +343,24 @@ public class Joueur extends Entite {
         System.out.println("Impossible de crafter avec ces items. Vérifiez la table de craft.");
     }
 
+=======
+    public void seConnecter () {
+    	try (Socket socket = new Socket("localhost", ServeurPvP.SERVER_PORT)) {
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(this.nom);
+            oos.close();
+            socket.close();
+//        	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//            System.out.println(in.readLine()); // Message initial du serveur
+             
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    
+>>>>>>> 790ddbbe3bd9aba0e79449e3820d1eb3a84dca12
 
     @Override
     public String toString() {

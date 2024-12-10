@@ -3,75 +3,25 @@ package jeu;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 import composants.Effet;
 import composants.Item;
 import composants.Joueur;
+import composants.Monstre;
 import composants.TypeItem;
 
 public class Jeu {
-	/*
-    public static void main(String args[]) {
-        Item epee = new Item("Épée", TypeItem.ARMES, Effet.AUGMENTE_PA, 10, true);
-
-        Item bouclier = new Item("Bouclier", TypeItem.ARMURES, Effet.AUGMENTE_PD, 5, true);
-        Item potion = new Item("Potion", TypeItem.POTIONS, Effet.AUGMENTE_PV, 20, false); // Non changeable
-        Item arc = new Item("Arc", TypeItem.ARMES, Effet.AUGMENTE_PA, 15, true);
-
-        // Création d'un joueur
-        Joueur joueur = new Joueur("Alex", 100, 15, 10, 1, 1);
-
-        // Ajout des items à l'inventaire
-        joueur.ajouterItem(bouclier);
-        joueur.ajouterItem(potion);
-        joueur.ajouterItem(arc);
-
-        // Équipement initial
-        joueur.setMainPrincipale(epee); // Épée en main principale
-        joueur.setMainSecondaire(null); // Rien en main secondaire
-
-        // Afficher l'inventaire
-        joueur.afficherInventaire();
-
-        // Tentative de changement d'items
-        System.out.println("\nTentative 1 : Changer l'épée par le bouclier");
-        joueur.changerItem(epee, bouclier);
-
-        System.out.println("\nInventaire après le changement :");
-        joueur.afficherInventaire();
-
-        System.out.println("\nTentative 2 : Changer le bouclier par la potion");
-        joueur.changerItem(bouclier, potion);
-
-        System.out.println("\nTentative 3 : Changer l'arc par la potion (erreur)");
-        joueur.changerItem(arc, potion);
-        
-        int largeur = 10;
-        int hauteur = 10;
-
-        // Préparer le jeu
-        PreparationJeu preparationJeu = new PreparationJeu(largeur, hauteur);
-        
-        // Générer les éléments sur le terrain
-        preparationJeu.genererElements();
-        
-        // Afficher le terrain dans la console
-        System.out.println("État initial du terrain :");
-        preparationJeu.afficherTerrain();
-        
-        // Sauvegarder le terrain dans un fichier
-        preparationJeu.ecrireTerrainDansFichier("terrain.txt");
-
-    }
-    */
 	
 	private static Scanner scanner = new Scanner(System.in);
 	
     private static Joueur joueur = new Joueur("Joueur", 100, 15, 10, 0, 0);
     private static PreparationJeu terrain = new PreparationJeu(10, 10); // Terrain de 10x10
     private static Map<List<String>, String> tableDeCraft = PreparationJeu.getTableDeCraft();
-
+    private static Random random = new Random();
+    private static String TIRETS = "----------";
+    
     public static void main(String[] args) {
     	String nomJoueur = "";
         boolean jeuEnCours = true;
@@ -79,7 +29,7 @@ public class Jeu {
         terrain.genererElements();
         
         
-        System.out.println("----------\tBienvenue dans MINECRAFT\t----------\n");
+        System.out.println(TIRETS +"\tBienvenue dans MINECRAFT\t"+ TIRETS +"\n");
         
         do {
         	System.out.print("Entrez votre nom : ");
@@ -93,7 +43,7 @@ public class Jeu {
         
         int typePartie = 0;
         do {
-        	System.out.println("Jouer :");
+        	System.out.println("\nVous souhaitez faire une partie :");
         	System.out.println("1- En Solo");
         	System.out.println("2- En PVP");
         	System.out.println("3- Quitter");
@@ -105,14 +55,6 @@ public class Jeu {
 				case 1: {
 		            scanner.nextLine();
 		            joueur.setNom(nomJoueur);
-
-		            Item bouclier = new Item("Bouclier", TypeItem.ARMURES, Effet.AUGMENTE_PD, 5, true);
-		            Item lingotArgent = new Item("Lingot d'argent", TypeItem.RESSOURCES, Effet.AUGMENTE_PV, 1, false);
-		            Item blocPierre = new Item("Bloc de pierre", TypeItem.ARMES, Effet.AUGMENTE_PA, 5, true);
-		            
-		            joueur.ajouterItem(bouclier);
-		            joueur.ajouterItem(lingotArgent);
-		            joueur.ajouterItem(blocPierre);
 		            
 					while (jeuEnCours) {
 			            afficherMenu();
@@ -160,21 +102,16 @@ public class Jeu {
 			                    break;
 			                
 			                case 4: // Consulter la map
-			                	terrain.enregistrerMap("terrain.txt", joueur);
+			                	actualiserLaMap();
 			                    break;
 			                
 			                case 5: // Utiliser un item
 			                    utiliserItem();
 			                    break;
-							/*
-			                case 6: // Quitter le jeu
-			                    System.out.println("Au revoir !");
-			                    enregistrerTerrainEtJoueur(); // Sauvegarde finale avant de quitter
-			                    jeuEnCours = false;
+			                case 6: // Afficher le profil d'un joueur
+			                    afficherProfilJoueur();
 			                    break;
-			                */
-			                    
-			                case 6:
+			                case 7:
 			                    System.out.println("Au revoir !");
 			                    jeuEnCours = false;
 			                	break;
@@ -201,16 +138,24 @@ public class Jeu {
         
     }
 
+// ======================================================================================
+
+    // MENU
     private static void afficherMenu() {
-        System.out.println("\n=== MENU ===");
+        System.out.println("\n"+ TIRETS +"MENU"+ TIRETS);
         System.out.println("1- Se déplacer");
         System.out.println("2- Consulter l'inventaire");
         System.out.println("3- Crafter");
         System.out.println("4- Consulter la map");
         System.out.println("5- Utiliser un item");
-        System.out.println("6- Quitter le jeu");
+        System.out.println("6- Afficher le profil du joueur");
+        System.out.println("7- Quitter le jeu");
     }
+    
+    
+ // ======================================================================================
 
+    // 1- DEPLACER LE JOUEUR
     private static void deplacerJoueur() {
         System.out.println("\nChoisissez une direction : ");
         System.out.println("1- Haut");
@@ -236,14 +181,114 @@ public class Jeu {
             default:
                 System.out.println("Direction invalide.");
         }
+        int nouveauX = joueur.getAxe_x();
+        int nouveauY = joueur.getAxe_y();
+        
+        char caractere = terrain.getContenuCase(nouveauX, nouveauY);
+        logiqueJeu(caractere);
+        terrain.setContenuCase(nouveauX, nouveauY, PreparationJeu.BLOC);
+    }
+    
+    /* 
+     * Si lors du déplacement le joueur tombe sur un item, on va le générer en fonction du type,
+     * Dans la carte chaque type d'item est représenté par un caractère.
+     * S'il tombe sur un Monstre alors le monstre est également généré et le combat est déclenché.
+     */
+    private static void logiqueJeu(char caractere) {
+    	
+    	switch (caractere) {
+	        case PreparationJeu.MONSTRE: // Monstre
+	            gererCombat();
+	            break;
+	        case 'A': // Arme
+	        case 'B': // Bloc
+	        case 'P': // Potion
+	        case 'N': // Aliment
+	        case 'R': // Armure
+	        case 'S': // Ressource
+	        case 'D': // Décoration
+	        case 'E': // Redstone
+	        case 'L': // Livre
+	        case 'X': // Objet spécial
+	            gererItem(caractere);
+	            break;
+	        default:
+	            System.out.println("Rien ici...");
+    	}
+    }
+    
+    // Gestion du combat
+    private static void gererCombat() {
+        Monstre monstre = PreparationJeu.genererMonstreAleatoire();
+        System.out.println("\nUn monstre apparaît : " + monstre);
+
+        while (joueur.getPointsDeVie() > 0 && monstre.getPointsDeVie() > 0) {
+            System.out.println("\nCombat en cours...");
+            joueur.attaquer(monstre);
+            if (monstre.getPointsDeVie() > 0) {
+                monstre.attaquer(joueur);
+            }
+        }
+
+        if (joueur.getPointsDeVie() <= 0) {
+            System.out.println("\n\nVous êtes mort ! Fin de la partie.");
+            System.exit(0); // Arrêter le jeu
+        } else {
+            System.out.println("\n\nVous avez vaincu le monstre !");
+        }
     }
 
+    // Generer les items
+    private static void gererItem(char initiale) {
+        TypeItem type = trouverTypeParInitiale(initiale);
+        if (type != null) {
+            Item item = genererItemAleatoire(type);
+            joueur.ajouterItem(item);
+            System.out.println("Vous avez collecté un item : " + item);
+        } else {
+            System.out.println("Aucun item associé à cette initiale.");
+        }
+    }
+    
+    private static TypeItem trouverTypeParInitiale(char initiale) {
+        for (TypeItem type : TypeItem.values()) {
+            if (type.getInitiale() == initiale) {
+                return type;
+            }
+        }
+        return null;
+    }
+    
+    private static Item genererItemAleatoire(TypeItem type) {
+        List<String> nomsPossibles = PreparationJeu.getNomsItemsParType(type);
+        
+        if (nomsPossibles.isEmpty()) {
+            // Aucun item disponible pour ce type
+            return null;
+        }
+
+        String nom = nomsPossibles.get(random.nextInt(nomsPossibles.size()));
+
+        // Génération de l'item avec des effets aléatoires
+        Effet effet = Effet.values()[random.nextInt(Effet.values().length)];
+        int valeur = random.nextInt(10) + 1;
+        Item item = new Item(nom, type, effet, valeur, true);
+        
+        return item;
+    }
+    
+ // ======================================================================================
+    
+    // 2- CONSULTER L'INVENTAIRE
     private static void consulterInventaire() {
-        System.out.println("\n=== Inventaire ===");
+        System.out.println("\n"+ TIRETS +"Inventaire"+ TIRETS);
         joueur.afficherInventaire();
     }
     
-    public static void afficherTableDeCraft() {
+ // ======================================================================================
+    
+    // 3- AFFICHER LA LISTE DES RECETTES ET CRAFTER
+    private static void afficherTableDeCraft() {
         System.out.println("\n=== Table de Craft ===");
 
         int index = 1;
@@ -254,15 +299,28 @@ public class Jeu {
             index++;
         }
     }
+    
+ // ======================================================================================
+    
+    // 4- ENREGISTRER L'ETAT DE LA MAP DANS LE FICHIER
+    private static void actualiserLaMap() {
+    	terrain.enregistrerMap("terrain.txt", joueur);
+    }
 
-
+ // ======================================================================================
+    
+    // 5- UTILISER UN ITEM
     private static void utiliserItem() {
-        System.out.println("=== Utiliser un item ===");
+        System.out.println("\n"+ TIRETS +"Utiliser un item"+ TIRETS);
+        // Affichage de la liste des items avec une numérotation
         joueur.afficherInventaire();
-
-        System.out.print("Entrez l'index de l'item à utiliser (ou -1 pour annuler) : ");
-        int index = Integer.parseInt(scanner.nextLine());
-
+        System.out.println("(-1)- Annuler");
+        System.out.print("Choix : ");
+        
+        int index = scanner.nextInt();
+        scanner.nextLine();
+        
+        index --; // Car j'ai créé une liste avec les éléments de l'inventaire.
         if (index >= 0 && index < joueur.getInventaire().size()) {
             Item item = joueur.getInventaire().get(index);
             joueur.utiliserItem(item.getNom());
@@ -270,23 +328,11 @@ public class Jeu {
             System.out.println("Index invalide.");
         }
     }
-
-	/*
-    private static void enregistrerTerrainEtJoueur() {
-        // Enregistrer le terrain dans un fichier texte
-        try (FileWriter writer = new FileWriter("terrain.txt")) {
-            writer.write(terrain.toString());
-        } catch (IOException e) {
-            System.out.println("Erreur lors de la sauvegarde du terrain : " + e.getMessage());
-        }
-
-        // Enregistrer les informations du joueur dans un fichier JSON
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File("joueur.json"), joueur);
-        } catch (IOException e) {
-            System.out.println("Erreur lors de la sauvegarde des informations du joueur : " + e.getMessage());
-        }
+    
+// ======================================================================================
+    
+    // 6- AFFICHER LES DETAILS SUR LE JOUEUR
+    private static void afficherProfilJoueur() {
+    	System.out.println(joueur.toString());
     }
-    */
 }

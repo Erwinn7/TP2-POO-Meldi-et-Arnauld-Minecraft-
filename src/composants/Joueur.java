@@ -2,28 +2,18 @@ package composants;
 
 import java.net.Socket;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
-<<<<<<< HEAD
+import jeu.ServeurPvP;
 import jeu.PreparationJeu;
 
 
 public class Joueur extends Entite {
 	
     private List<Item> inventaire;
-=======
-import jeu.ServeurPvP;
-
-public class Joueur extends Entite  {
-
-	private List<Item> inventaire;
->>>>>>> 790ddbbe3bd9aba0e79449e3820d1eb3a84dca12
-    private Random random;
 
 //  Direction 
     public final static String HAUT = "HAUT";
@@ -34,7 +24,6 @@ public class Joueur extends Entite  {
     public Joueur(String nom, int pointsDeVie, int pointsDattaque, int pointsDeDefense, int axe_x, int axe_y, Item main1, Item main2) {
         super(nom, pointsDeVie, pointsDattaque, pointsDeDefense, axe_x, axe_y, main1, main2);
         this.inventaire = new ArrayList<>();
-        this.random = new Random();
     }
     
     public Joueur(String nom) { 
@@ -60,31 +49,6 @@ public class Joueur extends Entite  {
             }
         }
         return false;
-    }
-    
-    public void deplacer(String direction) {
-        switch (direction) {
-        	// haut    
-        	case HAUT:
-                axe_x--;
-                break;
-            // bas
-            case BAS:
-                axe_x++;
-                break;
-            // droite
-            case DROITE:
-                axe_y++;
-                break;
-            // gauche
-            case GAUCHE:
-                axe_y--;
-                break;
-            default:
-                System.out.println("Direction invalide !");
-                return;
-        }
-        System.out.println(nom + " s'est déplacé vers le " + direction.toLowerCase() + ". Nouvelle position : (" + axe_x + ", " + axe_y + ")");
     }
     
     public void deplacer(String direction, PreparationJeu preparationJeu) {
@@ -119,7 +83,7 @@ public class Joueur extends Entite  {
                 if (axe_y == 0) {
                     // Ajouter une nouvelle colonne à gauche
                     for (List<Character> ligne : terrain) {
-                        ligne.add(0, preparationJeu.genererNouvelElement());
+                        ligne.add(0, preparationJeu.genererNouveauCaractere());
                     }
                     largeur++; // Mettre à jour la largeur
                 } else {
@@ -131,7 +95,7 @@ public class Joueur extends Entite  {
                 if (axe_y == largeur - 1) {
                     // Ajouter une nouvelle colonne à droite
                     for (List<Character> ligne : terrain) {
-                        ligne.add(preparationJeu.genererNouvelElement());
+                        ligne.add(preparationJeu.genererNouveauCaractere());
                     }
                     largeur++; // Mettre à jour la largeur
                 }
@@ -155,52 +119,14 @@ public class Joueur extends Entite  {
         System.out.println(item.getNom() + " a été ajouté à votre inventaire.");
     }
     
-    public void changerItem(Item ancien, Item nouveau) {
-        // Vérifier que l'ancien item est dans une main
-        if (mainPrincipale != ancien && mainSecondaire != ancien) {
-            System.out.println("L'item à changer n'est pas actuellement équipé !");
-            return;
-        }
-
-        if (!inventaire.contains(nouveau)) {
-            System.out.println("Le nouvel item n'est pas dans l'inventaire !");
-            return;
-        }
-
-        if (!nouveau.getEstChangeable()) {
-            System.out.println("Cet item ne peut pas être équipé !");
-            return;
-        }
-
-        if (mainPrincipale == ancien && mainPrincipale.getType().equals(nouveau.getType())) {
-            System.out.println("Vous ne pouvez pas équiper deux armes du même type !");
-            return;
-        }
-
-        if (mainSecondaire == ancien && mainSecondaire.getType().equals(nouveau.getType())) {
-            System.out.println("Vous ne pouvez pas équiper deux armes du même type !");
-            return;
-        }
-
-        inventaire.add(ancien);
-
-        inventaire.remove(nouveau);
-
-        if (mainPrincipale == ancien) {
-            mainPrincipale = nouveau;
-            System.out.println("Main principale changée : " + ancien.getNom() + " remplacé par " + nouveau.getNom());
-        } else if (mainSecondaire == ancien) {
-            mainSecondaire = nouveau;
-            System.out.println("Main secondaire changée : " + ancien.getNom() + " remplacé par " + nouveau.getNom());
-        }
-    }
-
-
     public void afficherInventaire() {
         System.out.println("Inventaire de " + nom + " :");
+        int index = 1;
         for (Item item : inventaire) {
-            System.out.println("- " + item);
+            System.out.println("("+ index +")- " + item);
+            index ++;
         }
+        if (index == 1) System.out.println("(Votre inventaire est vide.)");
     }
     
     public Item trouverItemDansInventaire(String nomItem) {
@@ -213,104 +139,113 @@ public class Joueur extends Entite  {
     }
 
     public void utiliserItem(String nomItem) {
+    	Item ajouter = null;
 	    for (Iterator<Item> iterator = inventaire.iterator(); iterator.hasNext();) {
 	        Item item = iterator.next();
 	        if (item.getNom().equalsIgnoreCase(nomItem)) {
 	            switch (item.getType()) {
-	                // Logique pour les armes
-	                case ARMES:
-	                    if (mainPrincipale == null) {
-	                        mainPrincipale = item;
-	                        System.out.println(nom + " a équipé l'arme dans la main principale. Points d'attaque augmentés de " + item.getValeur());
-	                    } else if (mainSecondaire == null) {
-	                        mainSecondaire = item;
-	                        System.out.println(nom + " a équipé l'arme dans la main secondaire. Points d'attaque augmentés de " + item.getValeur());
-	                    } else {
-	                        System.out.println("Vous avez déjà deux mains occupées !");
-	                    }
-	                    iterator.remove();
-	                    break;
-
-	                // Logique pour les armures
-	                case ARMURES:
-	                    System.out.println(nom + " a équipé une armure. Points de défense augmentés de " + item.getValeur());
-	                    iterator.remove();
-	                    break;
+		         	// Logique pour les armes
+		            case ARMES:
+		                if (mainPrincipale == null) {
+		                    mainPrincipale = item;
+		                    appliquerEffets(item, true);
+		                    System.out.println(nom + " a équipé l'arme dans la main principale.");
+		                } else {
+		                    System.out.println(nom + " a déjà une arme équipée. Remplacement en cours...");
+		                    retirerEffets(mainPrincipale);
+		                    
+		                    ajouter = mainPrincipale;
+		                    
+		                    mainPrincipale = item;
+		                    appliquerEffets(item, true);
+		                    
+		                    System.out.println(nom + " a remplacé l'arme dans la main principale.");
+		                }
+		                iterator.remove(); // Retirer l'item utilisé de l'inventaire
+		                break;
+	
+		            // Logique pour les armures
+		            case ARMURES:
+		                if (mainSecondaire == null) {
+		                    // Si aucune armure dans la main secondaire, on équipe directement
+		                    mainSecondaire = item;
+		                    appliquerEffets(item, true);
+		                    System.out.println(nom + " a équipé l'armure dans la main secondaire.");
+		                } else {
+		                    // Si une armure est déjà équipée dans la main secondaire, on la remplace
+		                    System.out.println(nom + " a déjà une armure équipée. Remplacement en cours...");
+		                    retirerEffets(mainSecondaire);
+		                    
+		                    ajouter = mainSecondaire;
+		                    
+		                    mainSecondaire = item;
+		                    appliquerEffets(item, true);
+		                    System.out.println(nom + " a remplacé l'armure dans la main secondaire.");
+		                }
+		                iterator.remove(); // Retirer l'item utilisé de l'inventaire
+		                break;
 
 	                case ALIMENTS:
 	                    iterator.remove();
+	    	            appliquerEffets(item, true);
 	                    System.out.println(nom + " a mangé " + item.getNom() + " et a gagné " + item.getValeur() + " points de vie.");
 	                    break;
 
 	                case POTIONS:
 	                    System.out.println(nom + " utilise la potion " + item.getNom());
 	                    iterator.remove();
+	    	            appliquerEffets(item, true);
+	                    break;
+	                    
+	                case RESSOURCES:
+	                    System.out.println(nom + " utilise la ressource " + item.getNom());
+	                    iterator.remove();
+	    	            appliquerEffets(item, true);
 	                    break;
 
 	                default:
 	                    System.out.println("Type inconnu ou action non applicable.");
 	                    break;
 	            }
-	            appliquerEffet(item);
-	            return;
 	        }
 	    }
-	    System.out.println("Vous ne possédez pas cet item.");
+	    
+	    if (ajouter != null && (mainPrincipale != null || mainSecondaire != null)) {
+	        inventaire.add(ajouter);
+	        return;
+	    } else if (ajouter == null && mainPrincipale == null && mainSecondaire == null) System.out.println("Vous ne possédez pas cet item.");
 	}
     
-    private void appliquerEffet(Item item) {
+ 
+    private void appliquerEffets(Item item, boolean appliquer) {
+    	// Ajouter (1) ou retirer (-1) les effets
+        int facteur = appliquer ? 1 : -1; 
         switch (item.getEffet()) {
             case AUGMENTE_PV:
-                pointsDeVie += item.getValeur();
-                System.out.println("Points de vie augmentés de " + item.getValeur());
+                pointsDeVie += facteur * item.getValeur();
                 break;
-
             case DIMINUE_PV:
-                pointsDeVie -= item.getValeur();
-                System.out.println("Points de vie diminués de " + item.getValeur());
+                pointsDeVie -= facteur * item.getValeur();
                 break;
-
             case AUGMENTE_PA:
-                pointsDattaque += item.getValeur();
-                System.out.println("Points d'attaque augmentés de " + item.getValeur());
+                pointsDattaque += facteur * item.getValeur();
                 break;
-
             case DIMINUE_PA:
-                pointsDattaque -= item.getValeur();
-                System.out.println("Points d'attaque diminués de " + item.getValeur());
+                pointsDattaque -= facteur * item.getValeur();
                 break;
-
             case AUGMENTE_PD:
-                pointsDeDefense += item.getValeur();
-                System.out.println("Points de défense augmentés de " + item.getValeur());
+                pointsDeDefense += facteur * item.getValeur();
                 break;
-
             case DIMINUE_PD:
-                pointsDeDefense -= item.getValeur();
-                System.out.println("Points de défense diminués de " + item.getValeur());
+                pointsDeDefense -= facteur * item.getValeur();
                 break;
+        }
+    }
 
-            default:
-                System.out.println("Aucun effet appliqué.");
-                break;
-        }
+    private void retirerEffets(Item item) {
+        appliquerEffets(item, false);
     }
-    
-    private void combat(Entite monstre) {
-        while (monstre.estEnVie() && this.estEnVie()) {
-            this.attaquer(monstre);
-            if (monstre.estEnVie()) {
-                monstre.attaquer(this);
-            }
-        }
-        if (this.estEnVie()) {
-            System.out.println("Vous avez vaincu le " + monstre.nom + " !");
-        } else {
-            System.out.println("Vous êtes mort !");
-        }
-    }
-    
-<<<<<<< HEAD
+
     public void crafter(Item item1, Item item2) {
         
         Map<List<String>, String> tableDeCraft = PreparationJeu.getTableDeCraft();
@@ -333,7 +268,6 @@ public class Joueur extends Entite  {
                 Effet effet = item1.getEffet();
                 Item nouvelItem = new Item(resultatNom, item1.getType(), effet, nouvelleValeur, item2.getEstChangeable());
 
-                // Ajouter le nouvel item dans l'inventaire
                 inventaire.add(nouvelItem);
                 
                 return;
@@ -343,7 +277,6 @@ public class Joueur extends Entite  {
         System.out.println("Impossible de crafter avec ces items. Vérifiez la table de craft.");
     }
 
-=======
     public void seConnecter () {
     	try (Socket socket = new Socket("localhost", ServeurPvP.SERVER_PORT)) {
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
@@ -358,9 +291,6 @@ public class Joueur extends Entite  {
 		}
     	
     }
-    
-    
->>>>>>> 790ddbbe3bd9aba0e79449e3820d1eb3a84dca12
 
     @Override
     public String toString() {

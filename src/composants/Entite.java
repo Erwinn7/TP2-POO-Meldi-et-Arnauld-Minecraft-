@@ -104,7 +104,23 @@ public abstract class Entite {
 	}
 	
 	@Override
-    public String toString() {
-        return "Entité : [Nom = " + nom + ", position = ("+ axe_x +", "+ axe_y+"), PV = (" + pointsDeVie + "), PA = (" + pointsDattaque + "), PD = (" + pointsDeDefense + ")]";
-    }
+	public String toString() {
+	    StringBuilder sb = new StringBuilder();
+	    sb.append("Entité : [")
+	      .append("Nom = ").append(nom)
+	      .append(", Position = (").append(axe_x).append(", ").append(axe_y).append(")")
+	      .append(", PV = ").append(pointsDeVie)
+	      .append(", PA = ").append(pointsDattaque)
+	      .append(", PD = ").append(pointsDeDefense)
+	      .append("]");
+
+	    sb.append("\nÉquipement : ");
+	    sb.append("\n  Main Principale : ");
+	    sb.append(mainPrincipale != null ? mainPrincipale : "Aucun");
+	    sb.append("\n  Main Secondaire : ");
+	    sb.append(mainSecondaire != null ? mainSecondaire : "Aucun");
+
+	    return sb.toString();
+	}
+
 }

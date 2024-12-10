@@ -102,7 +102,7 @@ public abstract class Entite {
 	public void setMainSecondaire(Item mainSecondaire) {
 		this.mainSecondaire = mainSecondaire;
 	}
-
+	
 	@Override
     public String toString() {
         return "Entité : [Nom = " + nom + ", position = ("+ axe_x +", "+ axe_y+"), PV = (" + pointsDeVie + "), PA = (" + pointsDattaque + "), PD = (" + pointsDeDefense + ")]";

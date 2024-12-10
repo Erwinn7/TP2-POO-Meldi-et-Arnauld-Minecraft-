@@ -1,12 +1,17 @@
 package composants;
 
-
+import java.net.Socket;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Joueur extends Entite {
-    private List<Item> inventaire;
+import jeu.ServeurPvP;
+
+public class Joueur extends Entite  {
+
+	private List<Item> inventaire;
     private Random random;
 
     public Joueur(String nom, int pointsDeVie, int pointsDattaque, int pointsDeDefense, int axe_x, int axe_y, Item main1, Item main2) {
@@ -15,7 +20,7 @@ public class Joueur extends Entite {
         this.random = new Random();
     }
     
-    public Joueur(String nom) {
+    public Joueur(String nom) { 
     	this(nom, 100, 10, 10, 1, 1, null, null);
     }
     
@@ -134,6 +139,23 @@ public class Joueur extends Entite {
             System.out.println("Vous êtes mort !");
         }
     }
+    
+    public void seConnecter () {
+    	try (Socket socket = new Socket("localhost", ServeurPvP.SERVER_PORT)) {
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(this.nom);
+            oos.close();
+            socket.close();
+//        	BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//            System.out.println(in.readLine()); // Message initial du serveur
+             
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    
 
     @Override
     public String toString() {
